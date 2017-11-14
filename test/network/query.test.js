@@ -2,17 +2,18 @@ var
   should = require('should'),
   sinon = require('sinon'),
   rewire = require('rewire'),
+  AbstractWrapper = rewire('../../src/networkWrapper/protocols/abstract/common'),
   RTWrapper = rewire('../../src/networkWrapper/protocols/abstract/realtime');
 
 describe('Network query management', function () {
   describe('#emitRequest', function () {
     var
-      emitRequest = RTWrapper.__get__('emitRequest'),
+      emitRequest = AbstractWrapper.__get__('emitRequest'),
       sendSpy,
       network;
 
     beforeEach(function () {
-      network = new RTWrapper('somewhere');
+      network = new AbstractWrapper('somewhere');
       network.send = function(request) {
         network.emit(request.requestId, request.response);
       };
@@ -106,7 +107,7 @@ describe('Network query management', function () {
 
     before(function () {
       emitRequestStub = sinon.stub();
-      emitRequestRevert = RTWrapper.__set__('emitRequest', emitRequestStub);
+      emitRequestRevert = AbstractWrapper.__set__('emitRequest', emitRequestStub);
     });
 
     after(function () {
@@ -114,7 +115,7 @@ describe('Network query management', function () {
     });
 
     beforeEach(function () {
-      network = new RTWrapper('somewhere');
+      network = new AbstractWrapper('somewhere');
       network.state = 'connected';
       emitRequestStub.reset();
     });
@@ -273,6 +274,18 @@ describe('Network query management', function () {
       response = {result: {channel: 'foobar', roomId: 'barfoo'}};
     });
 
+    it('should throw an error if the protocol does not support realtime', function() {
+      var cb = sinon.stub();
+
+      network = new AbstractWrapper('somewhere');
+
+      network.subscribe({}, {}, sinon.stub(), cb);
+      should(cb).be.calledOnce();
+      should(cb.firstCall.args[0]).be.an.instanceOf(Error);
+      should(cb.firstCall.args[0].message).be.eql('Not Implemented');
+      should(network.query).not.be.called();
+    });
+
     it('should throw an error if not connected', function() {
       var cb = sinon.stub();
 
@@ -378,6 +391,18 @@ describe('Network query management', function () {
       response = {result: {roomId: 'foobar'}};
     });
 
+    it('should throw an error if the protocol does not support realtime', function() {
+      var cb = sinon.stub();
+
+      network = new AbstractWrapper('somewhere');
+
+      network.unsubscribe({foo: 'bar'}, {bar: 'foo'}, 'channel', cb);
+      should(cb).be.calledOnce();
+      should(cb.firstCall.args[0]).be.an.instanceOf(Error);
+      should(cb.firstCall.args[0].message).be.eql('Not Implemented');
+      should(network.query).not.be.called();
+    });
+
     it('should call query method with good arguments', function() {
       var
         cb = sinon.stub();
@@ -439,15 +464,15 @@ describe('Network query management', function () {
         cleanStub = sinon.stub(),
         network;
 
-      RTWrapper = rewire('../../src/networkWrapper/protocols/abstract/realtime');
-      RTWrapper.__set__('cleanHistory', cleanStub);
-      network = new RTWrapper('somewhere');
+      AbstractWrapper = rewire('../../src/networkWrapper/protocols/abstract/common');
+      AbstractWrapper.__set__('cleanHistory', cleanStub);
+      network = new AbstractWrapper('somewhere');
 
       should(network.cleanHistoryTimer).be.null();
       should(cleanStub).not.be.called();
 
       network.clientConnected();
-      
+
       should(network.cleanHistoryTimer).be.not.null();
       should(cleanStub).not.be.called();
 
@@ -461,15 +486,15 @@ describe('Network query management', function () {
 
       clock.restore();
     });
-    
+
     it('should clean oldest entries every 1s', function () {
       var
         i,
         clock = sinon.useFakeTimers(),
         network;
 
-      RTWrapper = rewire('../../src/networkWrapper/protocols/abstract/realtime');
-      network = new RTWrapper('somewhere');
+      AbstractWrapper = rewire('../../src/networkWrapper/protocols/abstract/common');
+      network = new AbstractWrapper('somewhere');
       network.clientConnected();
 
       for (i = 100000; i >= 0; i -= 10000) {
