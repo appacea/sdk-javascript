@@ -214,7 +214,7 @@ class AbtractWrapper extends KuzzleEventEmitter {
 /**
  * Emit a request to Kuzzle
  *
- * @param {RTWrapper} network
+ * @param {AbstractWrapper} network
  * @param {object} request
  * @param {responseCallback} [cb]
  */
@@ -252,7 +252,7 @@ function discardRequest(object, cb) {
 
 /**
  * Clean up the queue, ensuring the queryTTL and queryMaxSize properties are respected
- * @param {RTWrapper} network
+ * @param {AbstractWrapper} network
  */
 function cleanQueue (network) {
   const now = Date.now();
