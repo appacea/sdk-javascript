@@ -176,11 +176,11 @@ class AbtractWrapper extends KuzzleEventEmitter {
   }
 
   subscribe(object, options, notificationCB, cb) {
-    cb(new Error('Not Implemented'));
+    throw new Error('Not Implemented');
   }
 
   unsubscribe(object, options, channel, cb) {
-    cb(new Error('Not Implemented'));
+    throw new Error('Not Implemented');
   }
 
   query(object, options, cb) {
