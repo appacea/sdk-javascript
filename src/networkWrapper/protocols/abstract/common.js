@@ -15,18 +15,15 @@ class AbtractWrapper extends KuzzleEventEmitter {
       },
       host: {
         value: host,
-        writable: false,
         enumerable: true
       },
       port: {
         value: (options && typeof options.port === 'number') ? options.port : 7512,
-        enumerable: true,
-        writable: false
+        enumerable: true
       },
       ssl: {
         value: (options && typeof options.sslConnection === 'boolean') ? options.sslConnection : false,
-        writable: true,
-        enumerable: false
+        enumerable: true
       },
       queuing: {
         value: false,
